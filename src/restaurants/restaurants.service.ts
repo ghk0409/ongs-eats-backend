@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateRestaurantDto } from './dtos/create-restaurant.dto';
+import { UpdateRestaurantDto } from './dtos/update-restaurant.dto';
 import { Restaurant } from './entities/restaurant.entity';
 
 @Injectable()
@@ -11,10 +12,12 @@ export class RestaurantService {
         @InjectRepository(Restaurant)
         private readonly restaurants: Repository<Restaurant>,
     ) {}
+
     // getAll - 모든 데이터 로드
     getAll(): Promise<Restaurant[]> {
         return this.restaurants.find();
     }
+
     // create - 데이터 저장
     createRestaurant(
         createRestaurantDto: CreateRestaurantDto,
@@ -22,5 +25,10 @@ export class RestaurantService {
         // repository를 사용한 내장 메서드를 통해 생성 - 저장 진행
         const newRestaurant = this.restaurants.create(createRestaurantDto);
         return this.restaurants.save(newRestaurant);
+    }
+
+    // update - 데이터 수정
+    updateRestaurant({ id, data }: UpdateRestaurantDto) {
+        return this.restaurants.update(id, { ...data });
     }
 }

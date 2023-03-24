@@ -1,5 +1,5 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
-import { IsBoolean, IsString, Length } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, Length } from 'class-validator';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 // GraphQL ObjectType 데코레이터 및 DB 테이블 매핑용 Entity 데코레이터
@@ -14,29 +14,31 @@ export class Restaurant {
     id: number;
 
     // GraphQL 필드 및 DB 테이블 컬럼 데코레이터
-    @Field((type) => String)
+    @Field((type) => String) // GraphQL
     @Column()
     @IsString()
     @Length(3, 10)
     name: string;
 
-    @Field((type) => Boolean)
-    @Column()
+    @Field((type) => Boolean, { defaultValue: true }) // GraphQL 스키마에서 해당 필드 default 설정
+    @Column({ default: true }) // DB 테이블 해당 컬럼 default 설정
+    @IsOptional() // 해당 필드 옵션 처리
     @IsBoolean()
     isBeef: boolean;
 
-    @Field((type) => String)
-    @Column()
+    @Field((type) => String, { defaultValue: 'Daejeon' })
+    @Column({ default: 'Daejeon' })
     @IsString()
     address: string;
 
-    @Field((type) => String)
+    @Field((type) => String, { nullable: true, defaultValue: 'no owner' })
     @Column()
     @IsString()
     ownerName: string;
 
-    @Field((type) => String)
-    @Column()
+    @Field((type) => String, { nullable: true })
+    @Column({ nullable: true })
+    @IsOptional()
     @IsString()
     categoryName: string;
 }
