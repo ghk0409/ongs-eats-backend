@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 // import { join } from 'path';
 import { RestaurantsModule } from './restaurants/restaurants.module';
 import * as Joi from 'joi';
+import { Restaurant } from './restaurants/entities/restaurant.entity';
 
 @Module({
     imports: [
@@ -37,8 +38,10 @@ import * as Joi from 'joi';
             username: process.env.DB_USERNAME,
             password: process.env.DB_PASSWORD, // localhost 연결 시, postgres는 패스워드 필요 X
             database: process.env.DB_NAME,
-            synchronize: true, // true일 경우: TypeORM이 DB에 연결할 때, DB를 모듈의 현재 상태로 마이그레이션함 (production에서는 true 금지!!)
-            logging: true,
+            // true일 경우: TypeORM이 DB에 연결할 때, DB를 모듈의 현재 상태로 마이그레이션함 (production에서는 true 금지!!)
+            synchronize: process.env.NODE_ENV !== 'prod', // prod 아닌 경우에만 true
+            logging: process.env.NODE_ENV !== 'prod', // prod 아닌 경우에만 true
+            entities: [Restaurant],
         }),
         RestaurantsModule,
     ],
