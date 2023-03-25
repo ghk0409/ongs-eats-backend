@@ -7,6 +7,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { RestaurantsModule } from './restaurants/restaurants.module';
 import * as Joi from 'joi';
 import { Restaurant } from './restaurants/entities/restaurant.entity';
+import { UsersModule } from './users/users.module';
+import { CommonModule } from './common/common.module';
+import { User } from './users/entities/user.entity';
 
 @Module({
     imports: [
@@ -41,9 +44,10 @@ import { Restaurant } from './restaurants/entities/restaurant.entity';
             // true일 경우: TypeORM이 DB에 연결할 때, DB를 모듈의 현재 상태로 마이그레이션함 (production에서는 true 금지!!)
             synchronize: process.env.NODE_ENV !== 'prod', // prod 아닌 경우에만 true
             logging: process.env.NODE_ENV !== 'prod', // prod 아닌 경우에만 true
-            entities: [Restaurant],
+            entities: [User],
         }),
-        RestaurantsModule,
+        UsersModule,
+        CommonModule,
     ],
     controllers: [],
     providers: [],

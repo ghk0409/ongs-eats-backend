@@ -6,7 +6,7 @@ The Backend of OngsEats!!
 
 ## 1. USER
 
-### 1-1. User Model:
+### 1-1. User Entity:
 
 -   id
 -   createdAt
