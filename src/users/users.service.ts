@@ -4,12 +4,14 @@ import { Repository } from 'typeorm';
 import { CreateAccountInput } from './dtos/create-account.dto';
 import { LoginInput } from './dtos/login.dto';
 import { User } from './entities/user.entity';
+import { JwtService } from 'src/jwt/jwt.service';
 
 @Injectable()
 export class UsersService {
     constructor(
         @InjectRepository(User)
         private readonly users: Repository<User>,
+        private readonly jwtService: JwtService,
     ) {}
 
     // 회원가입 - Object return { ok: 성공여부, error: 실패 시 에러 메시지 }
@@ -62,10 +64,13 @@ export class UsersService {
                     error: '비밀번호가 일치하지 않습니다. 다시 한 번 확인해주세요^^',
                 };
             }
+            // 3. make a JWT and give it to the user
+            // const token = this.jwtService.normalSign({ id: user.id });
+            const token = this.jwtService.specificSign(user.id);
 
             return {
                 ok: true,
-                token: 'testToken_kukukukukukukukuku',
+                token,
             };
         } catch (error) {
             return {
@@ -73,7 +78,5 @@ export class UsersService {
                 error,
             };
         }
-
-        // 3. make a JWT and give it to the user
     }
 }
