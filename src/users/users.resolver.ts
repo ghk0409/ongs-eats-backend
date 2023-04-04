@@ -11,8 +11,9 @@ import { UsersService } from './users.service';
 export class UsersResolver {
     constructor(private readonly usersService: UsersService) {}
 
-    @Query((returns) => Boolean)
-    test() {
+    // 사용자 토큰 인증
+    @Query((returns) => User)
+    me() {
         return true;
     }
 
