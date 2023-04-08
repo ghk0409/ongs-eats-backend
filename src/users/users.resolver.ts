@@ -1,4 +1,4 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import {
     CreateAccountInput,
     CreateAccountOutput,
@@ -6,15 +6,21 @@ import {
 import { LoginInput, LoginOutput } from './dtos/login.dto';
 import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
+import { UseFilters, UseGuards } from '@nestjs/common';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { AuthUser } from 'src/auth/auth-user.decorator';
+// import { AllExceptionFilter } from 'src/auth/auth.exception';
 
 @Resolver((of) => User)
 export class UsersResolver {
     constructor(private readonly usersService: UsersService) {}
 
+    // @UseFilters(new AllExceptionFilter())
     // 사용자 토큰 인증
     @Query((returns) => User)
-    me() {
-        return true;
+    @UseGuards(AuthGuard)
+    me(@AuthUser() authUser: User) {
+        return authUser;
     }
 
     // 회원가입 API

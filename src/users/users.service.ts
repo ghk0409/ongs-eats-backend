@@ -79,4 +79,9 @@ export class UsersService {
             };
         }
     }
+
+    // 사용자 ID 검색
+    async findById(id: number): Promise<User> {
+        return this.users.findOne({ where: { id } });
+    }
 }

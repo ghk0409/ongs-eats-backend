@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { CONFIG_OPTIONS } from './jwt.constants';
 import { JwtModuleOptions } from './jwt.interfaces';
 import * as jwt from 'jsonwebtoken';
-import { ConfigService } from '@nestjs/config';
+// import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class JwtService {
@@ -17,9 +17,15 @@ export class JwtService {
         return jwt.sign(payload, this.jwtOptions.privateKey);
         // return jwt.sign(payload, this.configService.get('PRIVATE_KEY'));
     }
+
     // 해당 프로젝트 특정 token 생성 메서드
     specificSign(userId: number): string {
         return jwt.sign({ id: userId }, this.jwtOptions.privateKey);
         // return jwt.sign(payload, this.configService.get('PRIVATE_KEY'));
+    }
+
+    // 토큰 검증 메서드
+    verify(token: string) {
+        return jwt.verify(token, this.jwtOptions.privateKey);
     }
 }

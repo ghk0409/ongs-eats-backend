@@ -13,7 +13,8 @@ import { UsersModule } from './users/users.module';
 import { CommonModule } from './common/common.module';
 import { User } from './users/entities/user.entity';
 import { JwtModule } from './jwt/jwt.module';
-import { jwtMiddleware } from './jwt/jwt.middleware';
+import { JwtMiddleware } from './jwt/jwt.middleware';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
     imports: [
@@ -38,6 +39,7 @@ import { jwtMiddleware } from './jwt/jwt.middleware';
             // autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
             // schema.gql 파일 생성 없이 메모리 상으로 저장
             autoSchemaFile: true,
+            context: ({ req }) => ({ user: req['user'] }),
         }),
         TypeOrmModule.forRoot({
             type: 'postgres',
@@ -56,19 +58,19 @@ import { jwtMiddleware } from './jwt/jwt.middleware';
         JwtModule.forRoot({
             privateKey: process.env.PRIVATE_KEY,
         }),
+        AuthModule,
     ],
     controllers: [],
     providers: [],
 })
-export class AppModule {}
 
 // middleware 설정 (각 라우트별 적용/제외, method 등 세부 설정 가능)
-// export class AppModule implements NestModule {
-//     configure(consumer: MiddlewareConsumer) {
-//         consumer.apply(jwtMiddleware).forRoutes({
-//             // 특정 path 및 method에만 middleware 적용 가능
-//             path: '/graphql',
-//             method: RequestMethod.ALL,
-//         });
-//     }
-// }
+export class AppModule implements NestModule {
+    configure(consumer: MiddlewareConsumer) {
+        consumer.apply(JwtMiddleware).forRoutes({
+            // 특정 path 및 method에만 middleware 적용 가능
+            path: '/graphql',
+            method: RequestMethod.ALL,
+        });
+    }
+}

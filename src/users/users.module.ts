@@ -7,5 +7,7 @@ import { UsersService } from './users.service';
 @Module({
     imports: [TypeOrmModule.forFeature([User])],
     providers: [UsersResolver, UsersService],
+    // 다른 모듈에서 UsersModule 내에 접근할 수 있도록 exports 설정 (UsersService 내보내기)
+    exports: [UsersService],
 })
 export class UsersModule {}
