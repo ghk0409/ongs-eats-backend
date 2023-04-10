@@ -5,7 +5,7 @@ import {
     registerEnumType,
 } from '@nestjs/graphql';
 import { CoreEntity } from 'src/common/entities/core.entity';
-import { BeforeInsert, Column, Entity } from 'typeorm';
+import { BeforeInsert, BeforeUpdate, Column, Entity } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { InternalServerErrorException } from '@nestjs/common';
 import { IsEmail, IsEnum, IsString } from 'class-validator';
@@ -44,8 +44,9 @@ export class User extends CoreEntity {
     // Listener
 
     // 패스워드 해싱 메서드
-    // User Entity가 DB insert(users.save) 되기 전에 실행
+    // User Entity가 DB insert(users.save) | update 되기 전에 실행
     @BeforeInsert()
+    @BeforeUpdate()
     async hashPassword(): Promise<void> {
         try {
             // hash(this.password)의 password는 users.create() 되었을 때 받은 password 값임

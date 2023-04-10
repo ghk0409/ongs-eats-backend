@@ -5,6 +5,7 @@ import { CreateAccountInput } from './dtos/create-account.dto';
 import { LoginInput } from './dtos/login.dto';
 import { User } from './entities/user.entity';
 import { JwtService } from 'src/jwt/jwt.service';
+import { EditProfileInput } from './dtos/edit-profile.dto';
 
 @Injectable()
 export class UsersService {
@@ -83,5 +84,33 @@ export class UsersService {
     // 사용자 ID 검색
     async findById(id: number): Promise<User> {
         return this.users.findOne({ where: { id } });
+    }
+
+    // 사용자 프로필 수정
+    async editProfile(
+        userId: number,
+        { email, password }: EditProfileInput,
+    ): Promise<User> {
+        // 로그인 상태에서만 프로필 수정이 가능하기 때문에 update()만 바로 사용
+        // update()는 해당 데이터 유무에 상관없이 update를 수행
+        const user = await this.users.findOne({ where: { id: userId } });
+        // email 중복 검사
+        const checkEmail = email
+            ? await this.users.findOne({ where: { email } })
+            : null;
+        // 이메일 중복일 경우 update 수행하지 않음 (이후 이메일 인증으로 변경 예정)
+        if (checkEmail) {
+            return null;
+        } else {
+            user.email = email;
+        }
+
+        if (password) {
+            user.password = password;
+        }
+
+        // @BeforeUpdate hook을 사용하기 위해 save() 사용
+        return this.users.save(user);
+        // return this.users.update(userId, { email, password });
     }
 }

@@ -5,7 +5,7 @@ import {
     PartialType,
     PickType,
 } from '@nestjs/graphql';
-import { MutationOutput } from 'src/common/dtos/output.dto';
+import { CoreOutput } from 'src/common/dtos/output.dto';
 import { User } from '../entities/user.entity';
 
 // create-account input data 타입
@@ -18,4 +18,4 @@ export class CreateAccountInput extends PickType(User, [
 
 // create-account outpu data 타입 (API return) - PartailType 사용으로 좀 더 nest스럽게
 @ObjectType()
-export class CreateAccountOutput extends PartialType(MutationOutput) {}
+export class CreateAccountOutput extends PartialType(CoreOutput) {}
