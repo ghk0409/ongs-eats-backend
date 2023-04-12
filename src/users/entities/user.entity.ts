@@ -31,7 +31,7 @@ export class User extends CoreEntity {
     @IsEmail() // email 유효성 검증
     email: string;
 
-    @Column()
+    @Column({ select: false }) // select: false => DB에서 select하지 않음 (relation으로 User 개체 가져올 때 password는 가져오지 않음)
     @Field((type) => String)
     @IsString() // password 유효성 검증
     password: string;
@@ -53,12 +53,15 @@ export class User extends CoreEntity {
     @BeforeInsert()
     @BeforeUpdate()
     async hashPassword(): Promise<void> {
-        try {
-            // hash(this.password)의 password는 users.create() 되었을 때 받은 password 값임
-            this.password = await bcrypt.hash(this.password, 10);
-        } catch (e) {
-            console.log(e);
-            throw new InternalServerErrorException();
+        // password가 있을 때만 해싱
+        if (this.password) {
+            try {
+                // hash(this.password)의 password는 users.create() 되었을 때 받은 password 값임
+                this.password = await bcrypt.hash(this.password, 10);
+            } catch (e) {
+                console.log(e);
+                throw new InternalServerErrorException();
+            }
         }
     }
 

@@ -15,7 +15,7 @@ export class Verification extends CoreEntity {
 
     // User와 Verification은 1:1 관계
     // Verification에서 User로 접근
-    @OneToOne((type) => User)
+    @OneToOne((type) => User, { onDelete: 'CASCADE' })
     @JoinColumn()
     user: User;
 
@@ -25,6 +25,6 @@ export class Verification extends CoreEntity {
         // Math.random을 이용한 랜덤 코드 생성
         // this.code = Math.random().toString(36).substring(2);
         // uuid를 이용한 랜덤 코드 생성
-        this.code = uuidv4();
+        this.code = uuidv4().replace(/-/g, '');
     }
 }

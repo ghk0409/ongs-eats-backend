@@ -1,12 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateAccountInput } from './dtos/create-account.dto';
+import {
+    CreateAccountInput,
+    CreateAccountOutput,
+} from './dtos/create-account.dto';
 import { LoginInput } from './dtos/login.dto';
 import { User } from './entities/user.entity';
 import { JwtService } from 'src/jwt/jwt.service';
-import { EditProfileInput } from './dtos/edit-profile.dto';
+import { EditProfileInput, EditProfileOutput } from './dtos/edit-profile.dto';
 import { Verification } from './entities/verification.entity';
+import { VerifiyEmailOutput } from './dtos/verify-email.dto';
+import { UserProfileOutput } from './dtos/user-profile.dto';
+import { LoginOutput } from './dtos/login.dto';
 
 @Injectable()
 export class UsersService {
@@ -24,7 +30,7 @@ export class UsersService {
         email,
         password,
         role,
-    }: CreateAccountInput): Promise<{ ok: boolean; error?: string }> {
+    }: CreateAccountInput): Promise<CreateAccountOutput> {
         // check new user
         try {
             const exists = await this.users.findOne({ where: { email } });
@@ -50,13 +56,15 @@ export class UsersService {
     }
 
     // 로그인 -
-    async login({
-        email,
-        password,
-    }: LoginInput): Promise<{ ok: boolean; error?: string; token?: string }> {
+    async login({ email, password }: LoginInput): Promise<LoginOutput> {
         try {
             // 1. find the user with the email
-            const user = await this.users.findOne({ where: { email } });
+            const user = await this.users.findOne({
+                where: { email },
+                // 기본적으로 password가 select 되지 않으므로 select 해줘야 함
+                // select로 특정 컬럼만 가져오기 때문에 user.id 값도 같이 가져와야 함!(jwt 토큰 생성 시 필요)
+                select: ['id', 'password'],
+            });
             // user 없을  경우
             if (!user) {
                 return {
@@ -90,37 +98,74 @@ export class UsersService {
     }
 
     // 사용자 ID 검색
-    async findById(id: number): Promise<User> {
-        return this.users.findOne({ where: { id } });
+    async findById(id: number): Promise<UserProfileOutput> {
+        try {
+            const user = await this.users.findOne({ where: { id } });
+            if (user) {
+                return {
+                    ok: true,
+                    user,
+                };
+            }
+        } catch (error) {
+            return { ok: false, error: '사용자를 찾을 수 없습니다.' };
+        }
     }
 
     // 사용자 프로필 수정
     async editProfile(
         userId: number,
         { email, password }: EditProfileInput,
-    ): Promise<User> {
-        // 로그인 상태에서만 프로필 수정이 가능하기 때문에 update()만 바로 사용
-        // update()는 해당 데이터 유무에 상관없이 update를 수행
-        const user = await this.users.findOne({ where: { id: userId } });
-        // email 중복 검사
-        const checkEmail = email
-            ? await this.users.findOne({ where: { email } })
-            : null;
-        // 이메일 중복일 경우 update 수행하지 않음 (이후 이메일 인증으로 변경 예정)
-        if (checkEmail) {
-            return null;
-        } else {
-            user.email = email;
-            // 이메일 변경 시 이메일 인증 다시 받기
-            await this.verifications.save(this.verifications.create({ user }));
-        }
+    ): Promise<EditProfileOutput> {
+        try {
+            // 로그인 상태에서만 프로필 수정이 가능하기 때문에 update()만 바로 사용
+            const user = await this.users.findOne({ where: { id: userId } });
+            // 이메일 있는 경우
+            if (email) {
+                user.email = email;
+                user.verified = false;
+                await this.verifications.save(
+                    this.verifications.create({ user }),
+                );
+            }
+            // 패스워드 있는 경우
+            if (password) {
+                user.password = password;
+            }
 
-        if (password) {
-            user.password = password;
+            // @BeforeUpdate hook을 사용하기 위해 save() 사용
+            // update()는 해당 데이터 유무에 상관없이 update를 수행
+            await this.users.save(user);
+            return { ok: true };
+            // return this.users.update(userId, { email, password });
+        } catch (error) {
+            return { ok: false, error: '프로필을 수정할 수 없습니다.' };
         }
+    }
 
-        // @BeforeUpdate hook을 사용하기 위해 save() 사용
-        return this.users.save(user);
-        // return this.users.update(userId, { email, password });
+    // 이메일 인증
+    async verifyEmail(code: string): Promise<VerifiyEmailOutput> {
+        try {
+            // verification code로 verification entity 찾기
+            const verification = await this.verifications.findOne({
+                where: { code },
+                // loadRelationIds: true, // relation id만 가져오기
+                relations: ['user'], // relation entity까지 가져오기
+            });
+
+            if (verification) {
+                // 해당 verification의 user의 verified를 true로 변경 후 저장
+                verification.user.verified = true;
+                // @BeforeUpdate hook을 사용하기 위해 save() 사용
+                this.users.save(verification.user);
+                // @BeforeUpdate hook을 사용하지 않을 경우 update() 사용
+                // this.users.update(verification.user.id, { verified: true });
+                return { ok: true };
+            }
+            return { ok: false, error: '인증 코드가 유효하지 않습니다.' };
+        } catch (error) {
+            console.log(error);
+            return { ok: false, error };
+        }
     }
 }
