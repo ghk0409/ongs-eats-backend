@@ -6,12 +6,15 @@ import { LoginInput } from './dtos/login.dto';
 import { User } from './entities/user.entity';
 import { JwtService } from 'src/jwt/jwt.service';
 import { EditProfileInput } from './dtos/edit-profile.dto';
+import { Verification } from './entities/verification.entity';
 
 @Injectable()
 export class UsersService {
     constructor(
         @InjectRepository(User)
         private readonly users: Repository<User>,
+        @InjectRepository(Verification)
+        private readonly verifications: Repository<Verification>,
         private readonly jwtService: JwtService,
     ) {}
 
@@ -33,7 +36,12 @@ export class UsersService {
                 };
             }
             // create user
-            await this.users.save(this.users.create({ email, password, role }));
+            const user = await this.users.save(
+                this.users.create({ email, password, role }),
+            );
+            // create verification
+            await this.verifications.save(this.verifications.create({ user }));
+
             return { ok: true };
         } catch (e) {
             // make error
@@ -103,6 +111,8 @@ export class UsersService {
             return null;
         } else {
             user.email = email;
+            // 이메일 변경 시 이메일 인증 다시 받기
+            await this.verifications.save(this.verifications.create({ user }));
         }
 
         if (password) {

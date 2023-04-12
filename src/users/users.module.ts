@@ -3,9 +3,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { UsersResolver } from './users.resolver';
 import { UsersService } from './users.service';
+import { Verification } from './entities/verification.entity';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([User])],
+    imports: [TypeOrmModule.forFeature([User, Verification])],
     providers: [UsersResolver, UsersService],
     // 다른 모듈에서 UsersModule 내에 접근할 수 있도록 exports 설정 (UsersService 내보내기)
     exports: [UsersService],

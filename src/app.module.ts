@@ -15,6 +15,7 @@ import { User } from './users/entities/user.entity';
 import { JwtModule } from './jwt/jwt.module';
 import { JwtMiddleware } from './jwt/jwt.middleware';
 import { AuthModule } from './auth/auth.module';
+import { Verification } from './users/entities/verification.entity';
 
 @Module({
     imports: [
@@ -51,7 +52,7 @@ import { AuthModule } from './auth/auth.module';
             // true일 경우: TypeORM이 DB에 연결할 때, DB를 모듈의 현재 상태로 마이그레이션함 (production에서는 true 금지!!)
             synchronize: process.env.NODE_ENV !== 'prod', // prod 아닌 경우에만 true
             logging: process.env.NODE_ENV !== 'prod', // prod 아닌 경우에만 true
-            entities: [User],
+            entities: [User, Verification],
         }),
         UsersModule,
         CommonModule,

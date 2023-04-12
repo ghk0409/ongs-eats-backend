@@ -41,6 +41,11 @@ export class User extends CoreEntity {
     @IsEnum(UserRole) // UserRole enum 유효성 검증
     role: UserRole;
 
+    // email 인증 여부
+    @Column({ default: false })
+    @Field((type) => Boolean)
+    verified: boolean;
+
     // Listener
 
     // 패스워드 해싱 메서드
