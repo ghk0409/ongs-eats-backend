@@ -13,6 +13,7 @@ import { Verification } from './entities/verification.entity';
 import { VerifiyEmailOutput } from './dtos/verify-email.dto';
 import { UserProfileOutput } from './dtos/user-profile.dto';
 import { LoginOutput } from './dtos/login.dto';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class UsersService {
@@ -22,6 +23,7 @@ export class UsersService {
         @InjectRepository(Verification)
         private readonly verifications: Repository<Verification>,
         private readonly jwtService: JwtService,
+        private readonly mailService: MailService,
     ) {}
 
     // 회원가입 - Object return { ok: 성공여부, error: 실패 시 에러 메시지 }
@@ -46,7 +48,15 @@ export class UsersService {
                 this.users.create({ email, password, role }),
             );
             // create verification
-            await this.verifications.save(this.verifications.create({ user }));
+            const verification = await this.verifications.save(
+                this.verifications.create({ user }),
+            );
+
+            // send email
+            this.mailService.sendVerificationEmail(
+                user.email,
+                verification.code,
+            );
 
             return { ok: true };
         } catch (e) {
@@ -124,8 +134,15 @@ export class UsersService {
             if (email) {
                 user.email = email;
                 user.verified = false;
-                await this.verifications.save(
+                // create verification
+                const verification = await this.verifications.save(
                     this.verifications.create({ user }),
+                );
+
+                // send email
+                this.mailService.sendVerificationEmail(
+                    user.email,
+                    verification.code,
                 );
             }
             // 패스워드 있는 경우
@@ -160,6 +177,10 @@ export class UsersService {
                 this.users.save(verification.user);
                 // @BeforeUpdate hook을 사용하지 않을 경우 update() 사용
                 // this.users.update(verification.user.id, { verified: true });
+
+                // verification entity 삭제
+                await this.verifications.delete(verification.id);
+
                 return { ok: true };
             }
             return { ok: false, error: '인증 코드가 유효하지 않습니다.' };
