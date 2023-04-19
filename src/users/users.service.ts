@@ -110,13 +110,13 @@ export class UsersService {
     // 사용자 ID 검색
     async findById(id: number): Promise<UserProfileOutput> {
         try {
-            const user = await this.users.findOne({ where: { id } });
-            if (user) {
-                return {
-                    ok: true,
-                    user,
-                };
-            }
+            // findOneOrFail()은 해당 데이터가 없을 경우 에러를 발생시킴
+            const user = await this.users.findOneOrFail({ where: { id } });
+            // findOneorFail을 사용함으로써 없을 경우 에러를 발생시키므로 if (user) 필요 없음
+            return {
+                ok: true,
+                user,
+            };
         } catch (error) {
             return { ok: false, error: '사용자를 찾을 수 없습니다.' };
         }
