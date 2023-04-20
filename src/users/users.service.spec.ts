@@ -14,6 +14,7 @@ const mockRepository = () => ({
     save: jest.fn(),
     create: jest.fn(),
     findOneOrFail: jest.fn(),
+    delete: jest.fn(),
 });
 
 const mockJwtService = {
@@ -229,7 +230,148 @@ describe('UsersService', () => {
         });
     });
 
-    // describe('editProfile', () => {});
+    describe('editProfile', () => {
+        it("should change user's email", async () => {
+            const oldUser = {
+                email: 'test@old.com',
+                verified: true,
+            };
+            const editProfileArgs = {
+                userId: 1, // oldUser.id
+                input: { email: 'test@new.com' },
+            };
+            const newVerification = {
+                code: 'code',
+            };
+            const newUser = {
+                verified: false,
+                email: editProfileArgs.input.email,
+            };
 
-    it.todo('verifyEmail');
+            usersRepository.findOne.mockResolvedValue(oldUser);
+            verificationRepository.create.mockReturnValue(newVerification);
+            verificationRepository.save.mockResolvedValue(newVerification);
+
+            await service.editProfile(
+                editProfileArgs.userId,
+                editProfileArgs.input,
+            );
+
+            // findOne 함수가 한 번 실행되었는지 확인
+            // findOne 함수가 실행되었을 때, where 조건이 id: editProfileArgs.userId 인지 확인
+            expect(usersRepository.findOne).toHaveBeenCalledTimes(1);
+            expect(usersRepository.findOne).toHaveBeenCalledWith({
+                where: { id: editProfileArgs.userId },
+            });
+            // newUser로 변경되었는지 확인
+            expect(verificationRepository.create).toHaveBeenCalledWith({
+                user: newUser,
+            });
+            // save 함수가 실행되었을 때, newVerification을 받았는지 확인
+            expect(verificationRepository.save).toHaveBeenCalledWith(
+                newVerification,
+            );
+            // sendVerificationEmail 함수가 실행되었을 때, newUser.email과 newVerification.code를 받았는지 확인
+            expect(mailService.sendVerificationEmail).toHaveBeenCalledWith(
+                newUser.email,
+                newVerification.code,
+            );
+        });
+
+        it("should change user's password", async () => {
+            const editProfileArgs = {
+                userId: 1,
+                input: { password: 'newPassword' },
+            };
+
+            usersRepository.findOne.mockResolvedValue({
+                password: 'oldPassword',
+            });
+
+            const result = await service.editProfile(
+                editProfileArgs.userId,
+                editProfileArgs.input,
+            );
+
+            // save 함수가 한 번 실행되었는지와 받은 args 확인
+            // save 함수가 실행되었을 때, editProfileArgs.input을 받았는지 확인
+            expect(usersRepository.save).toHaveBeenCalledTimes(1);
+            expect(usersRepository.save).toHaveBeenCalledWith(
+                editProfileArgs.input,
+            );
+            // result가 ok: true인지 확인
+            expect(result).toEqual({ ok: true });
+        });
+
+        it('should fail on exception', async () => {
+            usersRepository.findOne.mockRejectedValue(new Error());
+
+            const result = await service.editProfile(1, {
+                email: 'test@test.com',
+            });
+
+            expect(result).toEqual({
+                ok: false,
+                error: '프로필을 수정할 수 없습니다.',
+            });
+        });
+    });
+
+    describe('verifyEmail', () => {
+        it('should verify email', async () => {
+            const mockedVerification = {
+                user: { verified: false },
+                id: 1,
+            };
+
+            verificationRepository.findOne.mockResolvedValue(
+                mockedVerification,
+            );
+
+            const result = await service.verifyEmail('');
+
+            // findOne 함수가 한 번 실행되었는지 확인
+            // findOne 함수가 실행되었을 때, where 조건이 code: code 인지 확인
+            expect(verificationRepository.findOne).toHaveBeenCalledTimes(1);
+            expect(verificationRepository.findOne).toHaveBeenCalledWith(
+                expect.any(Object),
+            );
+            // save 함수가 한 번 실행되었는지 확인
+            // save 함수가 실행되었을 때, { verified: true }를 받았는지 확인
+            expect(usersRepository.save).toHaveBeenCalledTimes(1);
+            expect(usersRepository.save).toHaveBeenCalledWith({
+                verified: true,
+            });
+            // delete 함수가 한 번 실행되었는지 확인
+            // delete 함수가 실행되었을 때, mockedVerification.id를 받았는지 확인
+            expect(verificationRepository.delete).toHaveBeenCalledTimes(1);
+            expect(verificationRepository.delete).toHaveBeenCalledWith(
+                mockedVerification.id,
+            );
+            // result가 ok: true인지 확인
+            expect(result).toEqual({ ok: true });
+        });
+
+        it('should fail on verification not found', async () => {
+            verificationRepository.findOne.mockResolvedValue(undefined);
+
+            const result = await service.verifyEmail('');
+            // 인증코드 불일치 에러 확인
+            expect(result).toEqual({
+                ok: false,
+                error: '인증 코드가 유효하지 않습니다.',
+            });
+        });
+
+        it('should fail on exception', async () => {
+            verificationRepository.findOne.mockRejectedValue(new Error());
+
+            const result = await service.verifyEmail('');
+            // 에러 확인
+            expect(result).toEqual({
+                ok: false,
+                error: expect.any(Error),
+            });
+        });
+    });
 });
