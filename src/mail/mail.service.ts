@@ -11,13 +11,13 @@ export class MailService {
         @Inject(CONFIG_OPTIONS) private readonly mailOptions: MailModuleOption,
     ) {}
 
-    // 이메일 전송 메서드
-    private async sendEmail(
+    // 이메일 전송 메서드 (private 메서드는 테스트 불가능으로 테스트할 때는 public으로 변경)
+    async sendEmail(
         subject: string,
         template: string,
         to: string,
         emailVars: EmailVar[],
-    ) {
+    ): Promise<boolean> {
         // Mailgun API를 사용하기 위한 form-data 생성
         const form = new FormData();
         form.append('from', `OngsEats <${this.mailOptions.fromEmail}>`);
@@ -27,10 +27,10 @@ export class MailService {
         emailVars.forEach((eVar) => form.append(`v:${eVar.key}`, eVar.value));
 
         try {
-            await got(
+            await got.post(
                 `https://api.mailgun.net/v3/${this.mailOptions.domain}/messages`,
                 {
-                    method: 'POST',
+                    // method: 'POST',
                     headers: {
                         Authorization: `Basic ${Buffer.from(
                             `api:${this.mailOptions.apiKey}`,
@@ -39,9 +39,11 @@ export class MailService {
                     body: form,
                 },
             );
+
+            return true;
         } catch (error) {
             // quite error handling: 보통 이메일의 경우 에러가 발생해도 사용자에게 에러를 보여주지 않는다.
-            console.log(error);
+            return false;
         }
     }
 
