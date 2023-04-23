@@ -27,7 +27,7 @@ import { MailModule } from './mail/mail.module';
             ignoreEnvFile: process.env.NODE_ENV === 'prod',
             // 환경변수 데이터 유효성 검증
             validationSchema: Joi.object({
-                NODE_ENV: Joi.string().valid('dev', 'prod').required(),
+                NODE_ENV: Joi.string().valid('dev', 'prod', 'test').required(),
                 DB_HOST: Joi.string().required(),
                 DB_PORT: Joi.string().required(),
                 DB_USERNAME: Joi.string().required(),
@@ -55,7 +55,10 @@ import { MailModule } from './mail/mail.module';
             database: process.env.DB_NAME,
             // true일 경우: TypeORM이 DB에 연결할 때, DB를 모듈의 현재 상태로 마이그레이션함 (production에서는 true 금지!!)
             synchronize: process.env.NODE_ENV !== 'prod', // prod 아닌 경우에만 true
-            logging: process.env.NODE_ENV !== 'prod', // prod 아닌 경우에만 true
+            // dev일 경우에만 true
+            logging:
+                process.env.NODE_ENV !== 'prod' &&
+                process.env.NODE_ENV !== 'test',
             entities: [User, Verification],
         }),
         UsersModule,
