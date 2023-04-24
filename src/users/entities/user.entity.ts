@@ -26,7 +26,7 @@ registerEnumType(UserRole, { name: 'UserRole' });
 @ObjectType()
 @Entity()
 export class User extends CoreEntity {
-    @Column()
+    @Column({ unique: true }) // 이메일은 unique
     @Field((type) => String)
     @IsEmail() // email 유효성 검증
     email: string;

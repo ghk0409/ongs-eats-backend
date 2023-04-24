@@ -130,10 +130,19 @@ export class UsersService {
         try {
             // 로그인 상태에서만 프로필 수정이 가능하기 때문에 update()만 바로 사용
             const user = await this.users.findOne({ where: { id: userId } });
+
+            // 수정하고자 하는 이메일이 이미 존재하는지 확인
+            // const countedUser: number = await this.users.count({
+            //     where: { email },
+            // });
+
             // 이메일 있는 경우
             if (email) {
                 user.email = email;
                 user.verified = false;
+
+                // 먼저 기존 verification 삭제
+                await this.verifications.delete({ user: { id: user.id } });
                 // create verification
                 const verification = await this.verifications.save(
                     this.verifications.create({ user }),
