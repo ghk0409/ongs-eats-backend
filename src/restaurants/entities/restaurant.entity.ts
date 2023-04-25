@@ -1,44 +1,40 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
-import { IsBoolean, IsOptional, IsString, Length } from 'class-validator';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { IsString, Length } from 'class-validator';
+import { CoreEntity } from 'src/common/entities/core.entity';
+import { Column, Entity, ManyToOne } from 'typeorm';
+import { Category } from './category.entity';
+import { User } from 'src/users/entities/user.entity';
 
-// GraphQL ObjectType 데코레이터 및 DB 테이블 매핑용 Entity 데코레이터
-// isAbstarct true이면 추상화로 인해 스키마에 포함되지 않음(동시에 2개 타입 설정이 불가하기에 추상화로 확장시키는 것)
-// @InputType({ isAbstract: true })
+@InputType('RestaurantInputType', { isAbstract: true })
 @ObjectType()
 @Entity()
-export class Restaurant {
-    // DB primay key column
-    @PrimaryGeneratedColumn()
-    @Field((type) => Number)
-    id: number;
-
-    // GraphQL 필드 및 DB 테이블 컬럼 데코레이터
-    @Field((type) => String) // GraphQL
+export class Restaurant extends CoreEntity {
+    @Field((type) => String)
     @Column()
     @IsString()
     @Length(3, 10)
     name: string;
 
-    @Field((type) => Boolean, { defaultValue: true }) // GraphQL 스키마에서 해당 필드 default 설정
-    @Column({ default: true }) // DB 테이블 해당 컬럼 default 설정
-    @IsOptional() // 해당 필드 옵션 처리
-    @IsBoolean()
-    isBeef: boolean;
+    @Field((type) => String)
+    @Column()
+    @IsString()
+    coverImg: string;
 
-    @Field((type) => String, { defaultValue: 'Daejeon' })
+    @Field((type) => String, { defaultValue: '여의도' })
     @Column({ default: 'Daejeon' })
     @IsString()
     address: string;
 
-    @Field((type) => String, { nullable: true, defaultValue: 'no owner' })
-    @Column()
-    @IsString()
-    ownerName: string;
+    // category를 삭제할 때, restaurant는 삭제되지 않도록 nullable 설정
+    @Field((type) => Category, { nullable: true })
+    @ManyToOne((type) => Category, (category) => category.restaurants, {
+        nullable: true,
+        onDelete: 'SET NULL', // category가 삭제되면, restaurant의 category는 null로 설정
+    })
+    category: Category;
 
-    @Field((type) => String, { nullable: true })
-    @Column({ nullable: true })
-    @IsOptional()
-    @IsString()
-    categoryName: string;
+    // owner가 삭제되면 해당 restaurant도 삭제되도록 설정
+    @Field((type) => User)
+    @ManyToOne((type) => User, (user) => user.restaurants)
+    owner: User;
 }

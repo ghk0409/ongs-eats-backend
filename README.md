@@ -16,10 +16,19 @@ The Backend of OngsEats!!
 -   password
 -   role (client | owner | delivery)
 
-## 1-2. User CRUD:
+### 1-2. User CRUD:
 
 -   Create Account
 -   Log In
 -   See Profile
 -   Edit Profile
 -   Verify Email
+
+## 2. Restaurant
+
+### 1-1. Restaurant Entity
+
+-   name
+-   category
+-   address
+-   coverImage

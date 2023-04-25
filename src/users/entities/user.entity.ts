@@ -5,10 +5,11 @@ import {
     registerEnumType,
 } from '@nestjs/graphql';
 import { CoreEntity } from 'src/common/entities/core.entity';
-import { BeforeInsert, BeforeUpdate, Column, Entity } from 'typeorm';
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { InternalServerErrorException } from '@nestjs/common';
-import { IsEmail, IsEnum, IsString } from 'class-validator';
+import { IsBoolean, IsEmail, IsEnum, IsString } from 'class-validator';
+import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 
 // user role 타입 지정
 // type UserRole = 'client' | 'owner' | 'delivery';
@@ -22,7 +23,7 @@ enum UserRole {
 registerEnumType(UserRole, { name: 'UserRole' });
 
 // DB Entity 및 GraphQL 설정
-@InputType({ isAbstract: true })
+@InputType('UserInputType', { isAbstract: true })
 @ObjectType()
 @Entity()
 export class User extends CoreEntity {
@@ -44,7 +45,13 @@ export class User extends CoreEntity {
     // email 인증 여부
     @Column({ default: false })
     @Field((type) => Boolean)
+    @IsBoolean()
     verified: boolean;
+
+    // User Entity와 Restaurant Entity의 관계 설정
+    @Field((type) => [Restaurant])
+    @OneToMany((type) => Restaurant, (restaurant) => restaurant.owner)
+    restaurants: Restaurant[];
 
     // Listener
 

@@ -1,23 +1,21 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { CreateRestaurantDto } from './dtos/create-restaurant.dto';
-import { UpdateRestaurantDto } from './dtos/update-restaurant.dto';
+import {
+    CreateRestaurantInput,
+    CreateRestaurantOutput,
+} from './dtos/create-restaurant.dto';
 import { Restaurant } from './entities/restaurant.entity';
 import { RestaurantService } from './restaurants.service';
+import { AuthUser } from 'src/auth/auth-user.decorator';
+import { User } from 'src/users/entities/user.entity';
 
 // classtype function을 명시 (넣어주지 않아도 무방)
 @Resolver((of) => Restaurant)
 export class RestaurantsResolver {
-    // service 적용
     constructor(private readonly restaurantService: RestaurantService) {}
-    // 데코레이터를 사용하여 필요 기능 처리
-    @Query((returns) => [Restaurant])
-    restaurants(): Promise<Restaurant[]> {
-        return this.restaurantService.getAll();
-    }
 
-    // API - Create
-    @Mutation((returns) => Boolean)
+    @Mutation((returns) => CreateRestaurantOutput)
     async createRestaurant(
+        @AuthUser() authUser: User,
         // 1. Args 분리형
         // @Args('name') name: string,
         // @Args('isBeef') isBeef: boolean,
@@ -28,28 +26,11 @@ export class RestaurantsResolver {
         // createRestaurantInput: createRestaurantDto,
         // 3. Args를 묶는 ArgsType형
         @Args('input') // InputType 명시
-        createRestaurantDto: CreateRestaurantDto,
-    ): Promise<boolean> {
-        try {
-            await this.restaurantService.createRestaurant(createRestaurantDto);
-            return true;
-        } catch (e) {
-            console.log(e);
-            return false;
-        }
-    }
-
-    // API - Update
-    @Mutation((returns) => Boolean)
-    async updateRestaurant(
-        @Args('input') updateRestaurantDto: UpdateRestaurantDto,
-    ): Promise<boolean> {
-        try {
-            await this.restaurantService.updateRestaurant(updateRestaurantDto);
-            return true;
-        } catch (e) {
-            console.log(e);
-            return false;
-        }
+        createRestaurantInput: CreateRestaurantInput,
+    ): Promise<CreateRestaurantOutput> {
+        return this.restaurantService.createRestaurant(
+            authUser,
+            createRestaurantInput,
+        );
     }
 }

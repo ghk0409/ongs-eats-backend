@@ -1,6 +1,19 @@
-import { ArgsType, Field, InputType, OmitType } from '@nestjs/graphql';
-import { IsBoolean, IsString, Length } from 'class-validator';
+import { Field, InputType, ObjectType, PickType } from '@nestjs/graphql';
 import { Restaurant } from '../entities/restaurant.entity';
+import { CoreOutput } from 'src/common/dtos/output.dto';
+
+@InputType()
+export class CreateRestaurantInput extends PickType(Restaurant, [
+    'name',
+    'coverImg',
+    'address',
+]) {
+    @Field((type) => String)
+    categoryName: string;
+}
+
+@ObjectType()
+export class CreateRestaurantOutput extends CoreOutput {}
 
 // InputType을 통한 통합형 (하나의 오브젝트 argument 처리)
 // @InputType()
@@ -37,9 +50,3 @@ import { Restaurant } from '../entities/restaurant.entity';
 // }
 // InputType을 통한 Mapped Type
 // Restaurant entity는 ObjectType이므로 InputType으로 변환
-@InputType()
-export class CreateRestaurantDto extends OmitType(
-    Restaurant,
-    ['id'],
-    InputType,
-) {}
