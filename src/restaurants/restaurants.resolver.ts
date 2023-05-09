@@ -7,6 +7,8 @@ import { Restaurant } from './entities/restaurant.entity';
 import { RestaurantService } from './restaurants.service';
 import { AuthUser } from 'src/auth/auth-user.decorator';
 import { User } from 'src/users/entities/user.entity';
+import { SetMetadata } from '@nestjs/common';
+import { Role } from 'src/auth/role.decorator';
 
 // classtype function을 명시 (넣어주지 않아도 무방)
 @Resolver((of) => Restaurant)
@@ -14,6 +16,7 @@ export class RestaurantsResolver {
     constructor(private readonly restaurantService: RestaurantService) {}
 
     @Mutation((returns) => CreateRestaurantOutput)
+    @Role(['Owner'])
     async createRestaurant(
         @AuthUser() authUser: User,
         // 1. Args 분리형

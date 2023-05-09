@@ -12,6 +12,7 @@ import { AuthUser } from 'src/auth/auth-user.decorator';
 import { UserProfileInput, UserProfileOutput } from './dtos/user-profile.dto';
 import { EditProfileInput, EditProfileOutput } from './dtos/edit-profile.dto';
 import { VerifiyEmailOutput, VerifyEmailInput } from './dtos/verify-email.dto';
+import { Role } from 'src/auth/role.decorator';
 // import { AllExceptionFilter } from 'src/auth/auth.exception';
 
 @Resolver((of) => User)
@@ -21,7 +22,7 @@ export class UsersResolver {
     // @UseFilters(new AllExceptionFilter())
     // 사용자 토큰 인증
     @Query((returns) => User)
-    @UseGuards(AuthGuard)
+    @Role(['Any'])
     me(@AuthUser() authUser: User) {
         return authUser;
     }
@@ -41,8 +42,8 @@ export class UsersResolver {
     }
 
     // 사용자 프로필 조회
-    @UseGuards(AuthGuard)
     @Query((returns) => UserProfileOutput)
+    @Role(['Any'])
     async userProfile(
         @Args() { userId }: UserProfileInput,
     ): Promise<UserProfileOutput> {
@@ -50,8 +51,8 @@ export class UsersResolver {
     }
 
     // 사용자 프로필 수정
-    @UseGuards(AuthGuard)
     @Mutation((returns) => EditProfileOutput)
+    @Role(['Any'])
     async editProfile(
         @AuthUser() authUser: User,
         @Args('input') editProfileInput: EditProfileInput,

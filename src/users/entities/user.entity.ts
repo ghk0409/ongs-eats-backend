@@ -14,10 +14,10 @@ import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 // user role 타입 지정
 // type UserRole = 'client' | 'owner' | 'delivery';
 // enum type으로 user role 지정
-enum UserRole {
-    Client,
-    Owenr,
-    Delivery,
+export enum UserRole {
+    Client = 'Client',
+    Owner = 'Owner',
+    Delivery = 'Delivery',
 }
 // GraphQL에도 enum 타입 지정
 registerEnumType(UserRole, { name: 'UserRole' });
