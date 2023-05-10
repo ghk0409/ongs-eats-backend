@@ -1,7 +1,7 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
 import { IsString, Length } from 'class-validator';
 import { CoreEntity } from 'src/common/entities/core.entity';
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, ManyToOne, RelationId } from 'typeorm';
 import { Category } from './category.entity';
 import { User } from 'src/users/entities/user.entity';
 
@@ -39,4 +39,9 @@ export class Restaurant extends CoreEntity {
         onDelete: 'CASCADE',
     })
     owner: User;
+
+    // RelationId() 데코레이터를 사용하여 relation이 설정된 entity의 id를 가져올 수 있음
+    // relation이 설정된 owner 컬럼의 User 엔티티에 대한 id를 가져옴
+    @RelationId((restaurant: Restaurant) => restaurant.owner)
+    ownerId: number;
 }

@@ -16,7 +16,7 @@ The Backend of OngsEats!!
 -   password
 -   role (client | owner | delivery)
 
-### 1-2. User CRUD:
+### 1-2. User Service:
 
 -   Create Account
 -   Log In
@@ -26,9 +26,23 @@ The Backend of OngsEats!!
 
 ## 2. Restaurant
 
-### 1-1. Restaurant Entity
+### 2-1. Restaurant Entity
 
 -   name
 -   category
 -   address
 -   coverImage
+
+### 2-2. Restaurant Service:
+
+-   Edit Restaurant
+-   Delete Restaurant
+
+-   See Categories
+-   See Restaurants by Category (pagination)
+-   See Restaurants (pagination)
+-   See Restaurant
+
+-   Create Dish
+-   Edit Dish
+-   Delete Dish

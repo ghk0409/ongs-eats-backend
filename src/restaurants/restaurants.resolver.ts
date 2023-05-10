@@ -9,6 +9,10 @@ import { AuthUser } from 'src/auth/auth-user.decorator';
 import { User } from 'src/users/entities/user.entity';
 import { SetMetadata } from '@nestjs/common';
 import { Role } from 'src/auth/role.decorator';
+import {
+    EditRestaurantInput,
+    EditRestaurantOutput,
+} from './dtos/edit-restaurant.dto';
 
 // classtype function을 명시 (넣어주지 않아도 무방)
 @Resolver((of) => Restaurant)
@@ -34,6 +38,18 @@ export class RestaurantsResolver {
         return this.restaurantService.createRestaurant(
             authUser,
             createRestaurantInput,
+        );
+    }
+
+    @Mutation((returns) => EditRestaurantOutput)
+    @Role(['Owner'])
+    async editRestaurant(
+        @AuthUser() authUser: User,
+        @Args('input') editRestaurantInput: EditRestaurantInput,
+    ): Promise<EditRestaurantOutput> {
+        return this.restaurantService.editRestaurant(
+            authUser,
+            editRestaurantInput,
         );
     }
 }
