@@ -12,7 +12,7 @@ export class Restaurant extends CoreEntity {
     @Field((type) => String)
     @Column()
     @IsString()
-    @Length(3, 10)
+    @Length(3, 50)
     name: string;
 
     @Field((type) => String)
@@ -20,7 +20,7 @@ export class Restaurant extends CoreEntity {
     @IsString()
     coverImg: string;
 
-    @Field((type) => String, { defaultValue: '여의도' })
+    @Field((type) => String)
     @Column({ default: 'Daejeon' })
     @IsString()
     address: string;

@@ -1,4 +1,12 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import {
+    Args,
+    Int,
+    Mutation,
+    Parent,
+    Query,
+    ResolveField,
+    Resolver,
+} from '@nestjs/graphql';
 import {
     CreateRestaurantInput,
     CreateRestaurantOutput,
@@ -13,12 +21,20 @@ import {
     EditRestaurantInput,
     EditRestaurantOutput,
 } from './dtos/edit-restaurant.dto';
+import {
+    DeleteRestaurantInput,
+    DeleteRestaurantOutput,
+} from './dtos/delete-restaurant.dto';
+import { Category } from './entities/category.entity';
+import { AllCategoriesOutput } from './dtos/all-categories.dto';
+import { CategoryInput, CategoryOutput } from './dtos/category.dto';
 
 // classtype function을 명시 (넣어주지 않아도 무방)
 @Resolver((of) => Restaurant)
 export class RestaurantsResolver {
     constructor(private readonly restaurantService: RestaurantService) {}
 
+    // 음식점 생성 API
     @Mutation((returns) => CreateRestaurantOutput)
     @Role(['Owner'])
     async createRestaurant(
@@ -41,15 +57,56 @@ export class RestaurantsResolver {
         );
     }
 
+    // 음식점 수정 API
     @Mutation((returns) => EditRestaurantOutput)
     @Role(['Owner'])
     async editRestaurant(
-        @AuthUser() authUser: User,
+        @AuthUser() owner: User,
         @Args('input') editRestaurantInput: EditRestaurantInput,
     ): Promise<EditRestaurantOutput> {
         return this.restaurantService.editRestaurant(
-            authUser,
+            owner,
             editRestaurantInput,
         );
+    }
+
+    // 음식점 삭제 API
+    @Mutation((returns) => DeleteRestaurantOutput)
+    @Role(['Owner'])
+    async deleteRestaurant(
+        @AuthUser() owner: User,
+        @Args('input') deleteRestaurantInput: DeleteRestaurantInput,
+    ): Promise<DeleteRestaurantOutput> {
+        return this.restaurantService.deleteRestaurant(
+            owner,
+            deleteRestaurantInput,
+        );
+    }
+}
+
+@Resolver((of) => Category)
+export class CategoryResolver {
+    constructor(private readonly restaurantService: RestaurantService) {}
+
+    // 특정 카테고리 음식점 개수 API
+    // ResolveField를 통해 Dynamic Field 생성
+    @ResolveField((type) => Int)
+    restaurantCount(@Parent() category: Category): Promise<number> {
+        // await 없는 이유는 Promise를 반환하면 브라우저가 알아서 결과 나올 때까지 기다림
+        return this.restaurantService.countRestaurants(category);
+    }
+
+    // 모든 카테고리 조회 API
+    @Query((returns) => AllCategoriesOutput)
+    allCategories(): Promise<AllCategoriesOutput> {
+        return this.restaurantService.allCategories();
+    }
+
+    // 특정 카테고리 조회 API
+    @Query((returns) => CategoryOutput)
+    category(
+        @Args('input') categoryInput: CategoryInput,
+    ): Promise<CategoryOutput> {
+        return this.restaurantService.findCategoryBySlug(categoryInput);
     }
 }
