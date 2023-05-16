@@ -43,6 +43,17 @@ The Backend of OngsEats!!
 -   See Restaurants (pagination)
 -   See Restaurant
 
+## 3. Dish
+
 -   Create Dish
 -   Edit Dish
 -   Delete Dish
+
+## 4. Order
+
+-   Orders CRUD
+-   Orders Subscription (Owner, Customer, Delivery)
+
+## 5. Payments (Cron)
+
+-   payment (paddle 사용)
