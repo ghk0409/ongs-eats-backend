@@ -1,5 +1,5 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
-import { Restaurant } from '../entities/restaurant.entity';
+import { Restaurant } from '../../entities/restaurant.entity';
 import {
     PaginationInput,
     PaginationOutput,

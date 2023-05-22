@@ -10,7 +10,7 @@ import {
 import {
     CreateRestaurantInput,
     CreateRestaurantOutput,
-} from './dtos/create-restaurant.dto';
+} from './dtos/restaurant/create-restaurant.dto';
 import { Restaurant } from './entities/restaurant.entity';
 import { RestaurantService } from './restaurants.service';
 import { AuthUser } from 'src/auth/auth-user.decorator';
@@ -20,21 +20,32 @@ import { Role } from 'src/auth/role.decorator';
 import {
     EditRestaurantInput,
     EditRestaurantOutput,
-} from './dtos/edit-restaurant.dto';
+} from './dtos/restaurant/edit-restaurant.dto';
 import {
     DeleteRestaurantInput,
     DeleteRestaurantOutput,
-} from './dtos/delete-restaurant.dto';
+} from './dtos/restaurant/delete-restaurant.dto';
 import { Category } from './entities/category.entity';
-import { AllCategoriesOutput } from './dtos/all-categories.dto';
-import { CategoryInput, CategoryOutput } from './dtos/category.dto';
-import { RestaurantsInput, RestaurantsOutput } from './dtos/restaurants.dto';
-import { RestaurantInput, RestaurantOutput } from './dtos/restaurant.dto';
+import { AllCategoriesOutput } from './dtos/category/all-categories.dto';
+import { CategoryInput, CategoryOutput } from './dtos/category/category.dto';
+import {
+    RestaurantsInput,
+    RestaurantsOutput,
+} from './dtos/restaurant/restaurants.dto';
+import {
+    RestaurantInput,
+    RestaurantOutput,
+} from './dtos/restaurant/restaurant.dto';
 import {
     SearchRestaurantInput,
     SearchRestaurantOutput,
-} from './dtos/search-restaurant.dto';
+} from './dtos/restaurant/search-restaurant.dto';
+import { Dish } from './entities/dish.entity';
+import { CreateDishInput, CreateDishOutput } from './dtos/dish/create-dish.dto';
+import { EditDishInput, EditDishOutput } from './dtos/dish/edit-dish.dto';
+import { DeleteDishInput, DeleteDishOutput } from './dtos/dish/delete-dish.dto';
 
+// Restaurant Resolver
 // classtype function을 명시 (넣어주지 않아도 무방)
 @Resolver((of) => Restaurant)
 export class RestaurantsResolver {
@@ -116,6 +127,7 @@ export class RestaurantsResolver {
     }
 }
 
+// Category Resolver
 @Resolver((of) => Category)
 export class CategoryResolver {
     constructor(private readonly restaurantService: RestaurantService) {}
@@ -140,5 +152,38 @@ export class CategoryResolver {
         @Args('input') categoryInput: CategoryInput,
     ): Promise<CategoryOutput> {
         return this.restaurantService.findCategoryBySlug(categoryInput);
+    }
+}
+
+// Dish Resolver
+@Resolver((of) => Dish)
+export class DishResolver {
+    constructor(private readonly restaurantService: RestaurantService) {}
+
+    @Mutation((type) => CreateDishOutput)
+    @Role(['Owner'])
+    createDish(
+        @Args('input') createDishInput: CreateDishInput,
+        @AuthUser() owner: User,
+    ): Promise<CreateDishOutput> {
+        return this.restaurantService.createDish(owner, createDishInput);
+    }
+
+    @Mutation((type) => EditDishOutput)
+    @Role(['Owner'])
+    editDish(
+        @Args('input') editDishInput: EditDishInput,
+        @AuthUser() owner: User,
+    ): Promise<EditDishOutput> {
+        return this.restaurantService.editDish(owner, editDishInput);
+    }
+
+    @Mutation((type) => DeleteDishOutput)
+    @Role(['Owner'])
+    deleteDish(
+        @Args('input') deleteDishInput: DeleteDishInput,
+        @AuthUser() owner: User,
+    ): Promise<DeleteDishOutput> {
+        return this.restaurantService.deleteDish(owner, deleteDishInput);
     }
 }

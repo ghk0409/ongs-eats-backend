@@ -4,27 +4,38 @@ import { ILike, Raw, Repository } from 'typeorm';
 import {
     CreateRestaurantInput,
     CreateRestaurantOutput,
-} from './dtos/create-restaurant.dto';
+} from './dtos/restaurant/create-restaurant.dto';
 import { Restaurant } from './entities/restaurant.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Category } from './entities/category.entity';
 import {
     EditRestaurantInput,
     EditRestaurantOutput,
-} from './dtos/edit-restaurant.dto';
+} from './dtos/restaurant/edit-restaurant.dto';
 import { CategoryRepository } from './repositories/category.repository';
 import {
     DeleteRestaurantInput,
     DeleteRestaurantOutput,
-} from './dtos/delete-restaurant.dto';
-import { AllCategoriesOutput } from './dtos/all-categories.dto';
-import { CategoryInput, CategoryOutput } from './dtos/category.dto';
-import { RestaurantsInput, RestaurantsOutput } from './dtos/restaurants.dto';
-import { RestaurantInput, RestaurantOutput } from './dtos/restaurant.dto';
+} from './dtos/restaurant/delete-restaurant.dto';
+import { AllCategoriesOutput } from './dtos/category/all-categories.dto';
+import { CategoryInput, CategoryOutput } from './dtos/category/category.dto';
+import {
+    RestaurantsInput,
+    RestaurantsOutput,
+} from './dtos/restaurant/restaurants.dto';
+import {
+    RestaurantInput,
+    RestaurantOutput,
+} from './dtos/restaurant/restaurant.dto';
 import {
     SearchRestaurantInput,
     SearchRestaurantOutput,
-} from './dtos/search-restaurant.dto';
+} from './dtos/restaurant/search-restaurant.dto';
+import { CreateDishOutput } from './dtos/dish/create-dish.dto';
+import { CreateDishInput } from './dtos/dish/create-dish.dto';
+import { Dish } from './entities/dish.entity';
+import { EditDishInput, EditDishOutput } from './dtos/dish/edit-dish.dto';
+import { DeleteDishInput, DeleteDishOutput } from './dtos/dish/delete-dish.dto';
 
 @Injectable()
 export class RestaurantService {
@@ -33,6 +44,8 @@ export class RestaurantService {
         @InjectRepository(Restaurant)
         private readonly restaurants: Repository<Restaurant>,
         private readonly categories: CategoryRepository,
+        @InjectRepository(Dish)
+        private readonly dishes: Repository<Dish>,
     ) {}
 
     // create - 데이터 저장
@@ -292,6 +305,7 @@ export class RestaurantService {
         try {
             const restaurant = await this.restaurants.findOne({
                 where: { id: restaurantId },
+                relations: ['menu'], // menu relation 가져오기
             });
 
             if (!restaurant) {
@@ -341,6 +355,136 @@ export class RestaurantService {
             return {
                 ok: false,
                 error: '음식점을 찾을 수 없습니다!! ' + error,
+            };
+        }
+    }
+
+    // create - 메뉴 생성 메서드
+    async createDish(
+        owner: User,
+        createDishInput: CreateDishInput,
+    ): Promise<CreateDishOutput> {
+        try {
+            // 1. restaurant 찾기
+            const restaurant = await this.restaurants.findOne({
+                where: { id: createDishInput.restaurantId },
+            });
+
+            if (!restaurant) {
+                return {
+                    ok: false,
+                    error: '음식점을 찾을 수 없습니다!!',
+                };
+            }
+
+            // 2. owner 체크
+            if (owner.id !== restaurant.ownerId) {
+                return {
+                    ok: false,
+                    error: '메뉴를 생성할 권한이 없습니다^^',
+                };
+            }
+
+            // 3. 메뉴 생성
+            const dish = await this.dishes.save(
+                this.dishes.create({ ...createDishInput, restaurant }),
+            );
+
+            console.log(dish);
+            return {
+                ok: true,
+            };
+        } catch (error) {
+            return {
+                ok: false,
+                error: '메뉴를 생성할 수 없습니다!! ' + error,
+            };
+        }
+    }
+
+    // edit - 메뉴 수정 메서드
+    async editDish(
+        owner: User,
+        editDishInput: EditDishInput,
+    ): Promise<EditDishOutput> {
+        try {
+            // 1. 메뉴 찾기
+            const dish = await this.dishes.findOne({
+                where: { id: editDishInput.dishId },
+                relations: ['restaurant'],
+            });
+
+            if (!dish) {
+                return {
+                    ok: false,
+                    error: '메뉴를 찾을 수 없습니다!!',
+                };
+            }
+
+            // 2. owner 체크
+            if (owner.id !== dish.restaurant.ownerId) {
+                return {
+                    ok: false,
+                    error: '메뉴를 삭제할 권한이 없습니다^^',
+                };
+            }
+
+            // 3. 메뉴 수정
+            await this.dishes.save([
+                {
+                    id: editDishInput.dishId,
+                    ...editDishInput,
+                },
+            ]);
+
+            return {
+                ok: true,
+            };
+        } catch (error) {
+            return {
+                ok: false,
+                error: '메뉴를 수정할 수 없습니다!! ' + error,
+            };
+        }
+    }
+
+    // delete - 메뉴 삭제 메서드
+    async deleteDish(
+        owner: User,
+        { dishId }: DeleteDishInput,
+    ): Promise<DeleteDishOutput> {
+        try {
+            // 1. 메뉴 찾기
+            const dish = await this.dishes.findOne({
+                where: { id: dishId },
+                relations: ['restaurant'],
+            });
+
+            if (!dish) {
+                return {
+                    ok: false,
+                    error: '메뉴를 찾을 수 없습니다!!',
+                };
+            }
+
+            // 2. owner 체크
+            if (owner.id !== dish.restaurant.ownerId) {
+                return {
+                    ok: false,
+                    error: '메뉴를 삭제할 권한이 없습니다^^',
+                };
+            }
+
+            // 3. 메뉴 삭제
+            await this.dishes.delete(dishId);
+
+            return {
+                ok: true,
+            };
+        } catch (error) {
+            return {
+                ok: false,
+                error: '메뉴를 삭제할 수 없습니다!! ' + error,
             };
         }
     }
