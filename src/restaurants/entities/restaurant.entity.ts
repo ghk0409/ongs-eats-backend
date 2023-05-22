@@ -5,6 +5,7 @@ import { Column, Entity, ManyToOne, OneToMany, RelationId } from 'typeorm';
 import { Category } from './category.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Dish } from './dish.entity';
+import { Order } from 'src/orders/entities/order.entity';
 
 @InputType('RestaurantInputType', { isAbstract: true })
 @ObjectType()
@@ -40,6 +41,11 @@ export class Restaurant extends CoreEntity {
         onDelete: 'CASCADE',
     })
     owner: User;
+
+    // Restaurant Entity와 Order Entity의 관계 설정(owner에게 보이는 주문 목록)
+    @Field((type) => [Order])
+    @OneToMany((type) => Order, (order) => order.restaurant)
+    orders: Order[];
 
     // RelationId() 데코레이터를 사용하여 relation이 설정된 entity의 id를 가져올 수 있음
     // relation이 설정된 owner 컬럼의 User 엔티티에 대한 id를 가져옴

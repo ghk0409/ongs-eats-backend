@@ -10,6 +10,7 @@ import * as bcrypt from 'bcrypt';
 import { InternalServerErrorException } from '@nestjs/common';
 import { IsBoolean, IsEmail, IsEnum, IsString } from 'class-validator';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
+import { Order } from 'src/orders/entities/order.entity';
 
 // user role 타입 지정
 // type UserRole = 'client' | 'owner' | 'delivery';
@@ -52,6 +53,16 @@ export class User extends CoreEntity {
     @Field((type) => [Restaurant])
     @OneToMany((type) => Restaurant, (restaurant) => restaurant.owner)
     restaurants: Restaurant[];
+
+    // User Entity와 Order Entity의 관계 설정(customer에게 보이는 주문 목록)
+    @Field((type) => [Order])
+    @OneToMany((type) => Order, (order) => order.customer)
+    orders: Order[];
+
+    // User Entity와 Order Entity의 관계 설정(driver에게 보이는 주문 목록)
+    @Field((type) => [Order])
+    @OneToMany((type) => Order, (order) => order.driver)
+    rides: Order[];
 
     // Listener
 
