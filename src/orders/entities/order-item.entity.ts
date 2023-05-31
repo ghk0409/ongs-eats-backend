@@ -1,10 +1,6 @@
-import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
+import { Field, InputType, ObjectType } from '@nestjs/graphql';
 import { CoreEntity } from 'src/common/entities/core.entity';
-import {
-    Dish,
-    DishChoice,
-    DishOption,
-} from 'src/restaurants/entities/dish.entity';
+import { Dish } from 'src/restaurants/entities/dish.entity';
 import { Column, Entity, ManyToOne } from 'typeorm';
 
 @InputType('OrderItemOptionInputType', { isAbstract: true })
@@ -13,11 +9,8 @@ export class OrderItemOption {
     @Field((type) => String)
     name: string;
 
-    @Field((type) => [DishChoice], { nullable: true })
-    choice?: DishChoice;
-
-    @Field((type) => Int, { nullable: true })
-    extra?: number;
+    @Field((type) => String, { nullable: true })
+    choices: string;
 }
 
 @InputType('OrderItemInputType', { isAbstract: true })
@@ -30,6 +23,8 @@ export class OrderItem extends CoreEntity {
     dish: Dish;
 
     // 메뉴별 옵션을 위한 json 데이터 타입
+    // option이 json이기 때문에 관련 entity를 만들지 않아도 되지만 데이터 검증은 typeorm이나 nestjs에서 할 수 없음
+    // 대신 json이기 때문에 자유롭게 생성, 수정 등이 가능할 수 있음
     @Field((type) => [OrderItemOption], { nullable: true })
     @Column({ type: 'json', nullable: true })
     options?: OrderItemOption[];
