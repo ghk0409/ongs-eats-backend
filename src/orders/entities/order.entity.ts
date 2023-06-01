@@ -7,14 +7,25 @@ import {
 } from '@nestjs/graphql';
 import { IsEnum, IsNumber } from 'class-validator';
 import { CoreEntity } from 'src/common/entities/core.entity';
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
+import {
+    Column,
+    Entity,
+    JoinTable,
+    ManyToMany,
+    ManyToOne,
+    RelationId,
+} from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 import { OrderItem } from './order-item.entity';
 
 export enum OrderStatus {
+    // customer가 생성 (Pending)
     Pending = 'Pending',
+    // owner가 수정 가능 (Cooking, Cooked)
     Cooking = 'Cooking',
+    Cooked = 'Cooked',
+    // driver가 수정 가능 (PickedUp, Delivered)
     PickedUp = 'PickedUp',
     Delivered = 'Delivered',
 }
@@ -66,4 +77,12 @@ export class Order extends CoreEntity {
     @Field((type) => OrderStatus)
     @IsEnum(OrderStatus)
     status: OrderStatus;
+
+    // RelationId 값만 가져오기, RelationId() 데코레이터를 사용
+    // restaurant.entity 참고!
+    @RelationId((order: Order) => order.customer)
+    customerId: number;
+
+    @RelationId((order: Order) => order.driver)
+    driverId: number;
 }
