@@ -47,11 +47,31 @@ import { OrderItem } from './orders/entities/order-item.entity';
             }),
         }),
         GraphQLModule.forRoot<ApolloDriverConfig>({
+            subscriptions: {
+                // 'graphql-ws': {
+                //     onConnect: (context: Context) => {
+                //         console.log(context);
+                //         const { connectionParams, extra } = context;
+                //         extra.token = connectionParams['x_token'];
+                //     },
+                // },
+                'graphql-ws': true,
+                'subscriptions-transport-ws': {
+                    onConnect: async (connectionParams: any) => {
+                        console.log(connectionParams);
+                        return connectionParams;
+                        // token: connectionParams['x_token'],
+                    },
+                },
+            },
+            // installSubscriptionHandlers: true,
             driver: ApolloDriver,
             // autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
             // schema.gql 파일 생성 없이 메모리 상으로 저장
             autoSchemaFile: true,
-            context: ({ req }) => ({ user: req['user'] }),
+            context: ({ req }) => {
+                return { user: req['user'] };
+            },
         }),
         TypeOrmModule.forRoot({
             type: 'postgres',

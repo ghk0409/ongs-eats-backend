@@ -1,4 +1,4 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver, Subscription } from '@nestjs/graphql';
 import { Order } from './entities/order.entity';
 import { OrdersService } from './orders.service';
 import { CreateOrderInput, CreateOrderOutput } from './dtos/create-order.dto';
@@ -8,6 +8,9 @@ import { Role } from 'src/auth/role.decorator';
 import { GetOrdersInput, GetOrdersOutput } from './dtos/get-orders.dto';
 import { GetOrderInput, GetOrderOutput } from './dtos/get-order.dto';
 import { EditOrderInput, EditOrderOutput } from './dtos/edit-order.dto';
+import { PubSub } from 'graphql-subscriptions';
+
+const pubsub = new PubSub();
 
 @Resolver((of) => Order)
 export class OrdersResolver {
@@ -48,5 +51,20 @@ export class OrdersResolver {
         @Args('input') editOrderInput: EditOrderInput,
     ): Promise<EditOrderOutput> {
         return this.ordersService.editOrder(user, editOrderInput);
+    }
+
+    // Test용 Mutation
+    @Mutation((returns) => Boolean)
+    sweetPotatoReady() {
+        pubsub.publish('sweetPotatos', { orderSubscription: '고구마 완성~!!' }); // 해당하는 subscription 이름(트리거 이름)으로 publish
+        return true;
+    }
+
+    // Test용 Subcription
+    @Subscription((returns) => String)
+    @Role(['Any'])
+    orderSubscription(@AuthUser() user: User) {
+        console.log(user);
+        return pubsub.asyncIterator('sweetPotatos'); // 트리거 등록 (기다리는 이벤트 이름, subscription 이름)
     }
 }
