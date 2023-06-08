@@ -25,6 +25,8 @@ import { OrdersModule } from './orders/orders.module';
 import { Order } from './orders/entities/order.entity';
 import { OrderItem } from './orders/entities/order-item.entity';
 
+const TOKEN_KEY = 'x_token';
+
 @Module({
     imports: [
         ConfigModule.forRoot({
@@ -48,29 +50,21 @@ import { OrderItem } from './orders/entities/order-item.entity';
         }),
         GraphQLModule.forRoot<ApolloDriverConfig>({
             subscriptions: {
-                // 'graphql-ws': {
-                //     onConnect: (context: Context) => {
-                //         console.log(context);
-                //         const { connectionParams, extra } = context;
-                //         extra.token = connectionParams['x_token'];
-                //     },
-                // },
                 'graphql-ws': true,
                 'subscriptions-transport-ws': {
                     onConnect: async (connectionParams: any) => {
-                        console.log(connectionParams);
-                        return connectionParams;
-                        // token: connectionParams['x_token'],
+                        // 웹소켓 요청 시 전송된 토큰을 context에 저장
+                        return { token: connectionParams[TOKEN_KEY] };
                     },
                 },
             },
-            // installSubscriptionHandlers: true,
             driver: ApolloDriver,
             // autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
             // schema.gql 파일 생성 없이 메모리 상으로 저장
             autoSchemaFile: true,
-            context: ({ req }) => {
-                return { user: req['user'] };
+            context: ({ req, extra }) => {
+                // http 요청 시 전송된 토큰을 context에 저장
+                return { token: req ? req.headers[TOKEN_KEY] : extra.token };
             },
         }),
         TypeOrmModule.forRoot({
@@ -115,12 +109,13 @@ import { OrderItem } from './orders/entities/order-item.entity';
 })
 
 // middleware 설정 (각 라우트별 적용/제외, method 등 세부 설정 가능)
-export class AppModule implements NestModule {
-    configure(consumer: MiddlewareConsumer) {
-        consumer.apply(JwtMiddleware).forRoutes({
-            // 특정 path 및 method에만 middleware 적용 가능
-            path: '/graphql',
-            method: RequestMethod.ALL,
-        });
-    }
+export class AppModule {
+    // export class AppModule implements NestModule {
+    // configure(consumer: MiddlewareConsumer) {
+    //     consumer.apply(JwtMiddleware).forRoutes({
+    //         // 특정 path 및 method에만 middleware 적용 가능
+    //         path: '/graphql',
+    //         method: RequestMethod.ALL,
+    //     });
+    // }
 }
