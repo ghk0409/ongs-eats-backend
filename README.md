@@ -53,6 +53,9 @@ The Backend of OngsEats!!
 
 -   Orders CRUD
 -   Orders Subscription (Owner, Customer, Delivery)
+    -   Pending Orders (Owner) (trigger: createOrder(newOrder)) (sub: newOrder)
+    -   Order Status (Customer, Delivery, Owner) (trigger: editOrder(orderUpdate)) (sub: orderUpdate)
+    -   Pending Pickup Order (Delivery) (trigger: editOrder(orderUpdate)) (sub: orderUpdate)
 
 ## 5. Payments (Cron)
 

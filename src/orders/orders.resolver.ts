@@ -8,13 +8,17 @@ import { Role } from 'src/auth/role.decorator';
 import { GetOrdersInput, GetOrdersOutput } from './dtos/get-orders.dto';
 import { GetOrderInput, GetOrderOutput } from './dtos/get-order.dto';
 import { EditOrderInput, EditOrderOutput } from './dtos/edit-order.dto';
+import { Inject } from '@nestjs/common';
+import { PUB_SUB } from 'src/common/common.constants';
 import { PubSub } from 'graphql-subscriptions';
-
-const pubsub = new PubSub();
 
 @Resolver((of) => Order)
 export class OrdersResolver {
-    constructor(private readonly ordersService: OrdersService) {}
+    constructor(
+        private readonly ordersService: OrdersService,
+        @Inject(PUB_SUB)
+        private readonly pubSub: PubSub,
+    ) {}
 
     @Mutation((returns) => CreateOrderOutput)
     @Role(['Client'])
@@ -55,16 +59,25 @@ export class OrdersResolver {
 
     // Test용 Mutation
     @Mutation((returns) => Boolean)
-    sweetPotatoReady() {
-        pubsub.publish('sweetPotatos', { orderSubscription: '고구마 완성~!!' }); // 해당하는 subscription 이름(트리거 이름)으로 publish
+    sweetPotatoReady(@Args('potatoId') potatoId: number) {
+        this.pubSub.publish('sweetPotatos', {
+            orderSubscription: potatoId,
+        }); // 해당하는 subscription 이름(트리거 이름)으로 publish
         return true;
     }
 
     // Test용 Subcription
-    @Subscription((returns) => String)
+    @Subscription((returns) => String, {
+        filter: ({ orderSubscription }, { potatoId }) => {
+            return orderSubscription === potatoId;
+        },
+        resolve: ({ orderSubscription }) => {
+            return `Your potato with the id ${orderSubscription} is ready!`;
+        },
+    })
     @Role(['Any'])
-    orderSubscription(@AuthUser() user: User) {
-        console.log(user);
-        return pubsub.asyncIterator('sweetPotatos'); // 트리거 등록 (기다리는 이벤트 이름, subscription 이름)
+    orderSubscription(@Args('potatoId') potatoId: number) {
+        console.log(potatoId);
+        return this.pubSub.asyncIterator('sweetPotatos'); // 트리거 등록 (기다리는 이벤트 이름, subscription 이름)
     }
 }
