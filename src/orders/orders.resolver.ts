@@ -9,7 +9,7 @@ import { GetOrdersInput, GetOrdersOutput } from './dtos/get-orders.dto';
 import { GetOrderInput, GetOrderOutput } from './dtos/get-order.dto';
 import { EditOrderInput, EditOrderOutput } from './dtos/edit-order.dto';
 import { Inject } from '@nestjs/common';
-import { PUB_SUB } from 'src/common/common.constants';
+import { NEW_PENDING_ORDER, PUB_SUB } from 'src/common/common.constants';
 import { PubSub } from 'graphql-subscriptions';
 
 @Resolver((of) => Order)
@@ -57,27 +57,38 @@ export class OrdersResolver {
         return this.ordersService.editOrder(user, editOrderInput);
     }
 
-    // Test용 Mutation
-    @Mutation((returns) => Boolean)
-    sweetPotatoReady(@Args('potatoId') potatoId: number) {
-        this.pubSub.publish('sweetPotatos', {
-            orderSubscription: potatoId,
-        }); // 해당하는 subscription 이름(트리거 이름)으로 publish
-        return true;
-    }
-
-    // Test용 Subcription
-    @Subscription((returns) => String, {
-        filter: ({ orderSubscription }, { potatoId }) => {
-            return orderSubscription === potatoId;
-        },
-        resolve: ({ orderSubscription }) => {
-            return `Your potato with the id ${orderSubscription} is ready!`;
+    @Subscription((returns) => Order, {
+        filter: (payload, _, context) => {
+            console.log(payload);
+            return true;
         },
     })
-    @Role(['Any'])
-    orderSubscription(@Args('potatoId') potatoId: number) {
-        console.log(potatoId);
-        return this.pubSub.asyncIterator('sweetPotatos'); // 트리거 등록 (기다리는 이벤트 이름, subscription 이름)
+    @Role(['Owner'])
+    pendingOrders() {
+        return this.pubSub.asyncIterator(NEW_PENDING_ORDER);
     }
+
+    // // Test용 Mutation
+    // @Mutation((returns) => Boolean)
+    // sweetPotatoReady(@Args('potatoId') potatoId: number) {
+    //     this.pubSub.publish('sweetPotatos', {
+    //         orderSubscription: potatoId,
+    //     }); // 해당하는 subscription 이름(트리거 이름)으로 publish
+    //     return true;
+    // }
+
+    // // Test용 Subcription
+    // @Subscription((returns) => String, {
+    //     filter: ({ orderSubscription }, { potatoId }) => {
+    //         return orderSubscription === potatoId;
+    //     },
+    //     resolve: ({ orderSubscription }) => {
+    //         return `Your potato with the id ${orderSubscription} is ready!`;
+    //     },
+    // })
+    // @Role(['Any'])
+    // orderSubscription(@Args('potatoId') potatoId: number) {
+    //     console.log(potatoId);
+    //     return this.pubSub.asyncIterator('sweetPotatos'); // 트리거 등록 (기다리는 이벤트 이름, subscription 이름)
+    // }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order, OrderStatus } from './entities/order.entity';
 import { Repository } from 'typeorm';
@@ -11,6 +11,8 @@ import { GetOrdersInput, GetOrdersOutput } from './dtos/get-orders.dto';
 import { stat } from 'fs';
 import { GetOrderInput, GetOrderOutput } from './dtos/get-order.dto';
 import { EditOrderInput, EditOrderOutput } from './dtos/edit-order.dto';
+import { NEW_PENDING_ORDER, PUB_SUB } from 'src/common/common.constants';
+import { PubSub } from 'graphql-subscriptions';
 
 @Injectable()
 export class OrdersService {
@@ -23,6 +25,8 @@ export class OrdersService {
         private readonly orderItems: Repository<OrderItem>,
         @InjectRepository(Dish)
         private readonly dish: Repository<Dish>,
+        @Inject(PUB_SUB)
+        private readonly pubSub: PubSub,
     ) {}
 
     async createOrder(
@@ -107,6 +111,11 @@ export class OrdersService {
                     items: orderItems,
                 }),
             );
+
+            // 4. pubsub으로 새로운 주문 생성 알림
+            await this.pubSub.publish(NEW_PENDING_ORDER, {
+                pendingOrders: order,
+            });
 
             return {
                 ok: true,
