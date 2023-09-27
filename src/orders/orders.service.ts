@@ -1,18 +1,18 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Order, OrderStatus } from './entities/order.entity';
-import { Repository } from 'typeorm';
-import { CreateOrderInput, CreateOrderOutput } from './dtos/create-order.dto';
-import { User, UserRole } from 'src/users/entities/user.entity';
-import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
-import { OrderItem } from './entities/order-item.entity';
-import { Dish } from 'src/restaurants/entities/dish.entity';
-import { GetOrdersInput, GetOrdersOutput } from './dtos/get-orders.dto';
-import { stat } from 'fs';
-import { GetOrderInput, GetOrderOutput } from './dtos/get-order.dto';
-import { EditOrderInput, EditOrderOutput } from './dtos/edit-order.dto';
-import { NEW_PENDING_ORDER, PUB_SUB } from 'src/common/common.constants';
 import { PubSub } from 'graphql-subscriptions';
+import { NEW_PENDING_ORDER, PUB_SUB } from 'src/common/common.constants';
+import { Dish } from 'src/restaurants/entities/dish.entity';
+import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
+import { User, UserRole } from 'src/users/entities/user.entity';
+import { Repository } from 'typeorm';
+
+import { CreateOrderInput, CreateOrderOutput } from './dtos/create-order.dto';
+import { EditOrderInput, EditOrderOutput } from './dtos/edit-order.dto';
+import { GetOrderInput, GetOrderOutput } from './dtos/get-order.dto';
+import { GetOrdersInput, GetOrdersOutput } from './dtos/get-orders.dto';
+import { Order, OrderStatus } from './entities/order.entity';
+import { OrderItem } from './entities/order-item.entity';
 
 @Injectable()
 export class OrdersService {
@@ -114,7 +114,7 @@ export class OrdersService {
 
             // 4. pubsub으로 새로운 주문 생성 알림
             await this.pubSub.publish(NEW_PENDING_ORDER, {
-                pendingOrders: order,
+                pendingOrders: { order, ownerId: restaurant.ownerId },
             });
 
             return {

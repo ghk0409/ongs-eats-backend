@@ -1,16 +1,16 @@
+import { InternalServerErrorException } from '@nestjs/common';
 import {
     Field,
     InputType,
     ObjectType,
     registerEnumType,
 } from '@nestjs/graphql';
-import { CoreEntity } from 'src/common/entities/core.entity';
-import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { InternalServerErrorException } from '@nestjs/common';
 import { IsBoolean, IsEmail, IsEnum, IsString } from 'class-validator';
-import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
+import { CoreEntity } from 'src/common/entities/core.entity';
 import { Order } from 'src/orders/entities/order.entity';
+import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
 
 // user role 타입 지정
 // type UserRole = 'client' | 'owner' | 'delivery';

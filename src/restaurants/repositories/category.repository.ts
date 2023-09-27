@@ -1,6 +1,7 @@
-import { DataSource, Repository } from 'typeorm';
-import { Category } from '../entities/category.entity';
 import { Injectable } from '@nestjs/common';
+import { DataSource, Repository } from 'typeorm';
+
+import { Category } from '../entities/category.entity';
 
 // 레포지터리 커스텀
 @Injectable()

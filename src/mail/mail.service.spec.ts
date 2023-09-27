@@ -1,8 +1,9 @@
 import { Test } from '@nestjs/testing';
-import { MailService } from './mail.service';
-import { CONFIG_OPTIONS } from 'src/common/common.constants';
-import got from 'got';
 import * as FormData from 'form-data';
+import got from 'got';
+import { CONFIG_OPTIONS } from 'src/common/common.constants';
+
+import { MailService } from './mail.service';
 
 const API_KEY = 'test-apiKey';
 const DOMAIN = 'test-domain';

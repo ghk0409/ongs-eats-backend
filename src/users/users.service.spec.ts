@@ -1,11 +1,12 @@
 import { Test } from '@nestjs/testing';
-import { UsersService } from './users.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { User, UserRole } from './entities/user.entity';
-import { Verification } from './entities/verification.entity';
 import { JwtService } from 'src/jwt/jwt.service';
 import { MailService } from 'src/mail/mail.service';
 import { Repository } from 'typeorm';
+
+import { User, UserRole } from './entities/user.entity';
+import { Verification } from './entities/verification.entity';
+import { UsersService } from './users.service';
 
 // Mocking 함수 만들기 (테스트용으로 사용될 가짜)
 // repository가 2개라서 서로 다른 함수임을 명시하기 위해 함수로 만들어 사용

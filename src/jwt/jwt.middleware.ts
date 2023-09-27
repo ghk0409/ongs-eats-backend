@@ -1,7 +1,8 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { NextFunction, Request, Response } from 'express';
-import { JwtService } from './jwt.service';
 import { UsersService } from 'src/users/users.service';
+
+import { JwtService } from './jwt.service';
 
 // 클래스 형태 middleware
 @Injectable()

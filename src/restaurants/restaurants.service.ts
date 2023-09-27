@@ -1,41 +1,42 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ILike, Raw, Repository } from 'typeorm';
+import { User } from 'src/users/entities/user.entity';
+import { ILike, Repository } from 'typeorm';
+
+import { AllCategoriesOutput } from './dtos/category/all-categories.dto';
+import { CategoryInput, CategoryOutput } from './dtos/category/category.dto';
+import { CreateDishOutput } from './dtos/dish/create-dish.dto';
+import { CreateDishInput } from './dtos/dish/create-dish.dto';
+import { DeleteDishInput, DeleteDishOutput } from './dtos/dish/delete-dish.dto';
+import { EditDishInput, EditDishOutput } from './dtos/dish/edit-dish.dto';
 import {
     CreateRestaurantInput,
     CreateRestaurantOutput,
 } from './dtos/restaurant/create-restaurant.dto';
-import { Restaurant } from './entities/restaurant.entity';
-import { User } from 'src/users/entities/user.entity';
-import { Category } from './entities/category.entity';
-import {
-    EditRestaurantInput,
-    EditRestaurantOutput,
-} from './dtos/restaurant/edit-restaurant.dto';
-import { CategoryRepository } from './repositories/category.repository';
 import {
     DeleteRestaurantInput,
     DeleteRestaurantOutput,
 } from './dtos/restaurant/delete-restaurant.dto';
-import { AllCategoriesOutput } from './dtos/category/all-categories.dto';
-import { CategoryInput, CategoryOutput } from './dtos/category/category.dto';
 import {
-    RestaurantsInput,
-    RestaurantsOutput,
-} from './dtos/restaurant/restaurants.dto';
+    EditRestaurantInput,
+    EditRestaurantOutput,
+} from './dtos/restaurant/edit-restaurant.dto';
 import {
     RestaurantInput,
     RestaurantOutput,
 } from './dtos/restaurant/restaurant.dto';
 import {
+    RestaurantsInput,
+    RestaurantsOutput,
+} from './dtos/restaurant/restaurants.dto';
+import {
     SearchRestaurantInput,
     SearchRestaurantOutput,
 } from './dtos/restaurant/search-restaurant.dto';
-import { CreateDishOutput } from './dtos/dish/create-dish.dto';
-import { CreateDishInput } from './dtos/dish/create-dish.dto';
+import { Category } from './entities/category.entity';
 import { Dish } from './entities/dish.entity';
-import { EditDishInput, EditDishOutput } from './dtos/dish/edit-dish.dto';
-import { DeleteDishInput, DeleteDishOutput } from './dtos/dish/delete-dish.dto';
+import { Restaurant } from './entities/restaurant.entity';
+import { CategoryRepository } from './repositories/category.repository';
 
 @Injectable()
 export class RestaurantService {

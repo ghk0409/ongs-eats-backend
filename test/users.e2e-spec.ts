@@ -1,12 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
-import { AppModule } from '../src/app.module';
-import { DataSource, Repository } from 'typeorm';
-import { User } from 'src/users/entities/user.entity';
+import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import exp from 'constants';
+import { User } from 'src/users/entities/user.entity';
 import { Verification } from 'src/users/entities/verification.entity';
+import * as request from 'supertest';
+import { DataSource, Repository } from 'typeorm';
+
+import { AppModule } from '../src/app.module';
 
 const GRAPHQL_ENDPOINT = '/graphql';
 const testUser = {

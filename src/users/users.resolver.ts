@@ -1,18 +1,17 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { AuthUser } from 'src/auth/auth-user.decorator';
+import { Role } from 'src/auth/role.decorator';
+
 import {
     CreateAccountInput,
     CreateAccountOutput,
 } from './dtos/create-account.dto';
+import { EditProfileInput, EditProfileOutput } from './dtos/edit-profile.dto';
 import { LoginInput, LoginOutput } from './dtos/login.dto';
+import { UserProfileInput, UserProfileOutput } from './dtos/user-profile.dto';
+import { VerifiyEmailOutput, VerifyEmailInput } from './dtos/verify-email.dto';
 import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
-import { UseGuards } from '@nestjs/common';
-import { AuthGuard } from 'src/auth/auth.guard';
-import { AuthUser } from 'src/auth/auth-user.decorator';
-import { UserProfileInput, UserProfileOutput } from './dtos/user-profile.dto';
-import { EditProfileInput, EditProfileOutput } from './dtos/edit-profile.dto';
-import { VerifiyEmailOutput, VerifyEmailInput } from './dtos/verify-email.dto';
-import { Role } from 'src/auth/role.decorator';
 // import { AllExceptionFilter } from 'src/auth/auth.exception';
 
 @Resolver((of) => User)

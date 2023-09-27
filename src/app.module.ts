@@ -1,29 +1,24 @@
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import {
-    MiddlewareConsumer,
-    Module,
-    NestModule,
-    RequestMethod,
-} from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as Joi from 'joi';
-import { UsersModule } from './users/users.module';
-import { CommonModule } from './common/common.module';
-import { User } from './users/entities/user.entity';
-import { JwtModule } from './jwt/jwt.module';
-import { JwtMiddleware } from './jwt/jwt.middleware';
+
 import { AuthModule } from './auth/auth.module';
-import { Verification } from './users/entities/verification.entity';
+import { CommonModule } from './common/common.module';
+import { JwtModule } from './jwt/jwt.module';
 import { MailModule } from './mail/mail.module';
-import { Restaurant } from './restaurants/entities/restaurant.entity';
-import { Category } from './restaurants/entities/category.entity';
-import { RestaurantsModule } from './restaurants/restaurants.module';
-import { Dish } from './restaurants/entities/dish.entity';
-import { OrdersModule } from './orders/orders.module';
 import { Order } from './orders/entities/order.entity';
 import { OrderItem } from './orders/entities/order-item.entity';
+import { OrdersModule } from './orders/orders.module';
+import { Category } from './restaurants/entities/category.entity';
+import { Dish } from './restaurants/entities/dish.entity';
+import { Restaurant } from './restaurants/entities/restaurant.entity';
+import { RestaurantsModule } from './restaurants/restaurants.module';
+import { User } from './users/entities/user.entity';
+import { Verification } from './users/entities/verification.entity';
+import { UsersModule } from './users/users.module';
 
 const TOKEN_KEY = 'x_token';
 

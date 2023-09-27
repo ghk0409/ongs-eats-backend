@@ -7,43 +7,43 @@ import {
     ResolveField,
     Resolver,
 } from '@nestjs/graphql';
+import { AuthUser } from 'src/auth/auth-user.decorator';
+import { Role } from 'src/auth/role.decorator';
+import { User } from 'src/users/entities/user.entity';
+
+import { AllCategoriesOutput } from './dtos/category/all-categories.dto';
+import { CategoryInput, CategoryOutput } from './dtos/category/category.dto';
+import { CreateDishInput, CreateDishOutput } from './dtos/dish/create-dish.dto';
+import { DeleteDishInput, DeleteDishOutput } from './dtos/dish/delete-dish.dto';
+import { EditDishInput, EditDishOutput } from './dtos/dish/edit-dish.dto';
 import {
     CreateRestaurantInput,
     CreateRestaurantOutput,
 } from './dtos/restaurant/create-restaurant.dto';
-import { Restaurant } from './entities/restaurant.entity';
-import { RestaurantService } from './restaurants.service';
-import { AuthUser } from 'src/auth/auth-user.decorator';
-import { User } from 'src/users/entities/user.entity';
-import { SetMetadata } from '@nestjs/common';
-import { Role } from 'src/auth/role.decorator';
+import {
+    DeleteRestaurantInput,
+    DeleteRestaurantOutput,
+} from './dtos/restaurant/delete-restaurant.dto';
 import {
     EditRestaurantInput,
     EditRestaurantOutput,
 } from './dtos/restaurant/edit-restaurant.dto';
 import {
-    DeleteRestaurantInput,
-    DeleteRestaurantOutput,
-} from './dtos/restaurant/delete-restaurant.dto';
-import { Category } from './entities/category.entity';
-import { AllCategoriesOutput } from './dtos/category/all-categories.dto';
-import { CategoryInput, CategoryOutput } from './dtos/category/category.dto';
+    RestaurantInput,
+    RestaurantOutput,
+} from './dtos/restaurant/restaurant.dto';
 import {
     RestaurantsInput,
     RestaurantsOutput,
 } from './dtos/restaurant/restaurants.dto';
 import {
-    RestaurantInput,
-    RestaurantOutput,
-} from './dtos/restaurant/restaurant.dto';
-import {
     SearchRestaurantInput,
     SearchRestaurantOutput,
 } from './dtos/restaurant/search-restaurant.dto';
+import { Category } from './entities/category.entity';
 import { Dish } from './entities/dish.entity';
-import { CreateDishInput, CreateDishOutput } from './dtos/dish/create-dish.dto';
-import { EditDishInput, EditDishOutput } from './dtos/dish/edit-dish.dto';
-import { DeleteDishInput, DeleteDishOutput } from './dtos/dish/delete-dish.dto';
+import { Restaurant } from './entities/restaurant.entity';
+import { RestaurantService } from './restaurants.service';
 
 // Restaurant Resolver
 // classtype function을 명시 (넣어주지 않아도 무방)
