@@ -3,13 +3,19 @@ import { Args, Mutation, Query, Resolver, Subscription } from '@nestjs/graphql';
 import { PubSub } from 'graphql-subscriptions';
 import { AuthUser } from 'src/auth/auth-user.decorator';
 import { Role } from 'src/auth/role.decorator';
-import { NEW_PENDING_ORDER, PUB_SUB } from 'src/common/common.constants';
+import {
+    NEW_COOKED_ORDER,
+    NEW_ORDER_UPDATE,
+    NEW_PENDING_ORDER,
+    PUB_SUB,
+} from 'src/common/common.constants';
 import { User } from 'src/users/entities/user.entity';
 
 import { CreateOrderInput, CreateOrderOutput } from './dtos/create-order.dto';
 import { EditOrderInput, EditOrderOutput } from './dtos/edit-order.dto';
 import { GetOrderInput, GetOrderOutput } from './dtos/get-order.dto';
 import { GetOrdersInput, GetOrdersOutput } from './dtos/get-orders.dto';
+import { OrderUpdateInput } from './dtos/update-order.dto';
 import { Order } from './entities/order.entity';
 import { OrdersService } from './orders.service';
 
@@ -68,6 +74,36 @@ export class OrdersResolver {
     @Role(['Owner'])
     pendingOrders() {
         return this.pubSub.asyncIterator(NEW_PENDING_ORDER);
+    }
+
+    // Driver용
+    @Subscription((returns) => Order)
+    @Role(['Delivery'])
+    cookedOrders() {
+        return this.pubSub.asyncIterator(NEW_COOKED_ORDER);
+    }
+
+    @Subscription((returns) => Order, {
+        filter: (
+            { orderUpdates: order }: { orderUpdates: Order },
+            { input }: { input: OrderUpdateInput },
+            { user }: { user: User },
+        ) => {
+            // 해당 주문의 driver, customer, restaurant owner만
+            if (
+                order.driverId !== user.id &&
+                order.customerId !== user.id &&
+                order.restaurant.ownerId !== user.id
+            ) {
+                return false;
+            }
+            // 사용자가 원하는 주문 id일 경우만
+            return order.id === input.id;
+        },
+    })
+    @Role(['Any'])
+    orderUpdates(@Args('input') orderUpdateInput: OrderUpdateInput) {
+        return this.pubSub.asyncIterator(NEW_ORDER_UPDATE);
     }
 
     // // Test용 Mutation

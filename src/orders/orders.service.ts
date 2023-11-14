@@ -1,7 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PubSub } from 'graphql-subscriptions';
-import { NEW_PENDING_ORDER, PUB_SUB } from 'src/common/common.constants';
+import {
+    NEW_COOKED_ORDER,
+    NEW_ORDER_UPDATE,
+    NEW_PENDING_ORDER,
+    PUB_SUB,
+} from 'src/common/common.constants';
 import { Dish } from 'src/restaurants/entities/dish.entity';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 import { User, UserRole } from 'src/users/entities/user.entity';
@@ -262,7 +267,6 @@ export class OrdersService {
                 where: {
                     id: orderId,
                 },
-                relations: ['restaurant'],
             });
 
             if (!order) {
@@ -312,12 +316,27 @@ export class OrdersService {
                 };
             }
 
-            await this.orders.save([
-                {
-                    id: orderId,
-                    status,
-                },
-            ]);
+            await this.orders.save({
+                id: orderId,
+                status,
+            });
+
+            const newOrder = { ...order, status };
+
+            // owner가 수정한 주문 내역을 driver에게 알림
+            if (user.role === UserRole.Owner) {
+                if (status === OrderStatus.Cooked) {
+                    // .save가 업데이트된 order를 반환하지 않으므로 이전 order와 신규 status를 합쳐서 반환
+                    await this.pubSub.publish(NEW_COOKED_ORDER, {
+                        cookedOrders: newOrder,
+                    });
+                }
+            }
+
+            // 모든 사용자에게 수정된 주문 내역 알림
+            await this.pubSub.publish(NEW_ORDER_UPDATE, {
+                orderUpdates: newOrder,
+            });
 
             return {
                 ok: true,

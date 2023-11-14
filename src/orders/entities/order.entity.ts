@@ -42,6 +42,7 @@ export class Order extends CoreEntity {
     @ManyToOne((type) => User, (user) => user.orders, {
         onDelete: 'SET NULL',
         nullable: true,
+        eager: true, // customer 자동 relation load
     })
     customer?: User;
 
@@ -50,6 +51,7 @@ export class Order extends CoreEntity {
     @ManyToOne((type) => User, (user) => user.rides, {
         onDelete: 'SET NULL',
         nullable: true,
+        eager: true, // driver 자동 relation load
     })
     driver?: User;
 
@@ -58,6 +60,7 @@ export class Order extends CoreEntity {
     @ManyToOne((type) => Restaurant, (restaurant) => restaurant.orders, {
         onDelete: 'SET NULL',
         nullable: true,
+        eager: true, // restaurant 자동 relation load
     })
     restaurant?: Restaurant;
 
@@ -65,7 +68,7 @@ export class Order extends CoreEntity {
     // OrderItem는 어떤 Order를 가졌는지 알 수 없지만 Order는 어떤 OrderItem를 가졌는지 알아야 하므로 JoinTable()을 여기에 사용
     // ManyToMany에서는 through table이 만들어짐 (order_items_order_item 테이블이 만들어짐, in betweent table)
     @Field((type) => [OrderItem])
-    @ManyToMany((type) => OrderItem)
+    @ManyToMany((type) => OrderItem, { eager: true })
     @JoinTable()
     items: OrderItem[];
 
